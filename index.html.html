@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Anniversary Surprise 💖</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand&family=Dancing+Script&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #ffe6f0, #fff0f5, #ffe6e6);
+      font-family: 'Quicksand', sans-serif;
+      color: #4d0039;
+      text-align: center;
+      overflow-x: hidden;
+    }
+    #envelope-container, #password-screen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    #envelope {
+      width: 180px;
+      height: 120px;
+      position: relative;
+      perspective: 800px;
+      animation: pulse 1.5s infinite alternate;
+      cursor: pointer;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 8px #ff4d88aa; }
+      100% { transform: scale(1.05); box-shadow: 0 0 16px #ff4d88ee; }
+    }
+    .flap {
+      width: 100%;
+      height: 60px;
+      background-color: #ff4d88;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top;
+      transition: transform 0.8s ease;
+      position: absolute;
+      top: 0;
+    }
+    .body {
+      width: 100%;
+      height: 60px;
+      background-color: #ff99bb;
+      position: absolute;
+      bottom: 0;
+      border-radius: 0 0 10px 10px;
+    }
+    #envelope.open .flap { transform: rotateX(-180deg); }
+    .heart {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      color: white;
+    }
+    #password-screen {
+      display: none;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    #password-screen.visible {
+      display: flex;
+      opacity: 1;
+    }
+    input[type="date"] {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ff4d88;
+      margin-top: 15px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 22px;
+      font-size: 1rem;
+      background: linear-gradient(45deg, #ff4d88, #ff99cc);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 5px #ff94b8;
+    }
+    #main-content {
+      display: none;
+      padding: 40px 15px;
+    }
+    h1 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 1.7rem;
+      color: #d8006a;
+      margin-bottom: 25px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 25px 20px;
+      max-width: 500px;
+      margin: 0 auto 40px;
+      box-shadow: 0 12px 30px rgba(255, 102, 153, 0.25);
+    }
+    .slideshow-container {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 600 / 310;
+      margin: 20px auto;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff0f5;
+    }
+    .slide {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border: 5px solid #ff4d88;
+      border-radius: 16px;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.9);
+      transition: 0.5s ease;
+    }
+    .slide.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      z-index: 5;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #loveContainer {
+      font-family: 'Dancing Script', cursive;
+      font-size: 0.9rem;
+      line-height: 1.4rem;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(255, 102, 153, 0.15);
+      text-align: center;
+      color: #a80050;
+      max-width: 500px;
+      margin: 0 auto;
+      border: 2px solid #ff99bb;
+    }
+    footer {
+      margin-top: 30px;
+      color: #b37799;
+      font-style: italic;
+    }
+    .heart-float {
+      position: fixed;
+      bottom: -30px;
+      width: 16px;
+      height: 16px;
+      background-color: #ff4d88;
+      border-radius: 10px 10px 0 0;
+      opacity: 0.8;
+      pointer-events: none;
+      animation: floatUp 7s linear forwards;
+      z-index: 9999;
+    }
+    .heart-float::before,
+    .heart-float::after {
+      content: '';
+      position: absolute;
+      background-color: #ff4d88;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+    }
+    .heart-float::before { top: -8px; left: 0; }
+    .heart-float::after { left: -8px; top: 0; }
+    @keyframes floatUp {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-110vh); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="envelope-container" onclick="openEnvelope()">
+    <div id="envelope">
+      <div class="flap"></div>
+      <div class="body"></div>
+      <div class="heart">💌</div>
+    </div>
+  </div>
+
+  <div id="password-screen">
+    <h1>Enter your password 💌</h1>
+    <input type="date" id="passwordInput" />
+    <button onclick="checkPassword()">Enter</button>
+  </div>
+
+  <div id="main-content">
+    <h1><span id="typingText"></span></h1>
+    <section class="card">
+      <div class="slideshow-container">
+        <img src="1751330731551.jpg" class="slide active" />
+        <img src="1751330786614.jpg" class="slide" />
+        <img src="IMG_20250701_174542.jpg" class="slide" />
+        <img src="1751363246539.jpg" class="slide" />
+      </div>
+      <div class="nav-buttons">
+        <button onclick="prevSlide()">⟨Previous</button>
+        <button onclick="nextSlide()">Next ⟩</button>
+      </div>
+      <div id="loveContainer">
+        <div style="text-align: left; margin-bottom: 40px;">
+          <strong>To:</strong> Sheena Camille Lerin<br />
+          <strong>From:</strong> Troy Aaron Adino
+        </div>
+        Mahal kong Sheena, Happy 2nd Anniversary, Mahal ko! 💖<br/>
+        Dalawang taon na pala ang lumipas. Salamat sa pagmamahal, pag-unawa, at pag-aalaga.<br/>
+        Pasensya na sa mga pagkukulang ko, pero tandaan mo…<br/>
+        <em>Ikaw ang aking lakas, inspirasyon, at tahanan.</em><br/>
+        Nawa’y marami pa tayong alaala at taon na pagsasamahan.<br/>
+        Mahal na mahal kita, higit pa sa alam mo. 💕
+      </div>
+    </section>
+    <footer>With all my love &hearts;</footer>
+    <audio id="bgMusic" autoplay loop>
+      <source src="Nothing's Gonna Change My Love For You  Piano Cover with Strings (with PIANO SHEET).mp3" type="audio/mpeg" />
+    </audio>
+  </div>
+
+  <script>
+    function openEnvelope() {
+      document.getElementById("envelope").classList.add("open");
+      setTimeout(() => {
+        document.getElementById("envelope-container").style.display = "none";
+        document.getElementById("password-screen").classList.add("visible");
+      }, 700);
+    }
+
+    function checkPassword() {
+      const inputDate = document.getElementById("passwordInput").value;
+      const correctDate = "2025-07-02";
+      if (inputDate === correctDate) {
+        document.getElementById("password-screen").classList.remove("visible");
+        setTimeout(() => {
+          document.getElementById("password-screen").style.display = "none";
+          const main = document.getElementById("main-content");
+          main.style.display = "block";
+          typeAnniversaryMessage("Happy 2nd Anniversary, Mahal ko! 💖", "typingText");
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          setTimeout(() => { startFloatingHearts(); }, 1500);
+          document.getElementById("bgMusic").play().catch(() => {});
+        }, 800);
+      } else {
+        alert("Mali ang password mo Mahal ko! 🎁");
+      }
+    }
+
+    function typeAnniversaryMessage(text, elementId, speed = 75) {
+      const el = document.getElementById(elementId);
+      let index = 0;
+      el.innerHTML = "";
+      function type() {
+        if (index < text.length) {
+          el.innerHTML += text.charAt(index);
+          index++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
+    }
+
+    const slides = document.querySelectorAll('.slide');
+    let currentIndex = 0;
+    let slideInterval = setInterval(nextSlide, 5000);
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+    }
+
+    function nextSlide() {
+      currentIndex = (currentIndex + 1) % slides.length;
+      showSlide(currentIndex);
+      resetInterval();
+    }
+
+    function prevSlide() {
+      currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+      showSlide(currentIndex);
+      resetInterval();
+    }
+
+    function resetInterval() {
+      clearInterval(slideInterval);
+      slideInterval = setInterval(nextSlide, 5000);
+    }
+
+    function startFloatingHearts() {
+      for (let i = 0; i < 10; i++) {
+        setTimeout(() => {
+          const heart = document.createElement("div");
+          heart.classList.add("heart-float");
+          heart.style.left = Math.random() * 100 + "vw";
+          document.body.appendChild(heart);
+          setTimeout(() => heart.remove(), 8000);
+        }, i * 300);
+      }
+    }
+  </script>
+</body>
+</html>
